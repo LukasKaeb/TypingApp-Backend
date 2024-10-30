@@ -4,7 +4,7 @@ from flask_restful import Api, Resource
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 api = Api(app)
 
 client = MongoClient('mongodb://db:27017')
