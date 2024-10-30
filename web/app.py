@@ -61,16 +61,21 @@ class AddUser(Resource):
 
 class UpdateTimeTyping(Resource):
     def post(self):
-        posted_data = request.get_json()
+        try:
+            posted_data = request.get_json()
         
-        uid = posted_data['uid']
-        increment = posted_data['test_time']
+            uid = posted_data['uid']
+            increment = posted_data['test_time']
 
-        if not user_exists(uid):
-            return jsonify(generate_return_dict(301, 'Invalid User ID'))
+            if not user_exists(uid):
+                return jsonify(generate_return_dict(301, 'Invalid User ID'))
         
-        update_time_typing(uid, increment)
-        return jsonify(generate_return_dict(200, 'Time Updated'))
+            update_time_typing(uid, increment)
+            return jsonify(generate_return_dict(200, 'Time Updated'))
+
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return {"status": "error", "message": str(e)}, 500
 
 class StoreTestResult(Resource):
 
