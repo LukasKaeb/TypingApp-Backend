@@ -4,7 +4,7 @@ from flask_restful import Api, Resource
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 api = Api(app)
 
 client = MongoClient('mongodb://db:27017')
@@ -75,28 +75,33 @@ class UpdateTimeTyping(Resource):
 class StoreTestResult(Resource):
 
     def post(self):
-        posted_data = request.get_json()
+        try:
+
+            posted_data = request.get_json()
         
-        uid = posted_data['uid']
-        wpm = posted_data['wpm']
-        raw_wpm = posted_data['raw_wpm']
+            uid = posted_data['uid']
+            wpm = posted_data['wpm']
+            raw_wpm = posted_data['raw_wpm']
         
-        if not user_exists(uid):
-            return jsonify(generate_return_dict(301, 'Invalid User ID'))
+            if not user_exists(uid):
+                return jsonify(generate_return_dict(301, 'Invalid User ID'))
         
-        #New data base entry for the user
-        users.update_one({
-            'uid': uid
-        }, {
-            '$push': {
-                'tests': {
-                    'wpm': wpm,
-                    'raw_wpm': raw_wpm
+            #New data base entry for the user
+            users.update_one({
+                'uid': uid
+            }, {
+                '$push': {
+                    'tests': {
+                        'wpm': wpm,
+                        'raw_wpm': raw_wpm
+                    }
                 }
-            }
-        })
+            } )
         
-        return jsonify(generate_return_dict(200, 'Test Added'))
+            return jsonify(generate_return_dict(200, 'Test Added'))
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return {"status": "error", "message": str(e)}, 500
 
 api.add_resource(UpdateTestCount, '/update_test_count')
 api.add_resource(AddUser, '/add_user')       
