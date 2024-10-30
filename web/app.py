@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flask_restful import Api, Resource
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 api = Api(app)
 
 client = MongoClient('mongodb://db:27017')
@@ -71,6 +73,7 @@ class UpdateTimeTyping(Resource):
         return jsonify(generate_return_dict(200, 'Time Updated'))
 
 class StoreTestResult(Resource):
+
     def post(self):
         posted_data = request.get_json()
         
