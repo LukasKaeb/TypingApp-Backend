@@ -24,18 +24,18 @@ def generate_return_dict(status, msg):
     }
     return ret_json
 
-def update_test_count(uid, test_count):
+def update_test_count(uid, increment):
     users.update_one({'uid': uid}, {'$inc': {'test_count': increment}})
 
-def update_time_typing(uid, time):
-    users.update_one({'uid': uid}, {'$set': {'test_time': time}})
+def update_time_typing(uid, increment):
+    users.update_one({'uid': uid}, {'$inc': {'test_time': increment}})
 
 class UpdateTestCount(Resource):
     def post(self):
         posted_data = request.get_json()
 
         uid = posted_data['uid']
-        increment  = posted_data['test_count']
+        increment = posted_data['test_count']
 
         if not user_exists(uid):
             return jsonify(generate_return_dict(301, 'Invalid User ID'))
@@ -64,12 +64,12 @@ class UpdateTimeTyping(Resource):
         posted_data = request.get_json()
         
         uid = posted_data['uid']
-        time = posted_data['test_time']
+        increment = posted_data['test_time']
 
         if not user_exists(uid):
             return jsonify(generate_return_dict(301, 'Invalid User ID'))
         
-        update_time_typing(uid, time + time)
+        update_time_typing(uid, increment)
         return jsonify(generate_return_dict(200, 'Time Updated'))
 
 class StoreTestResult(Resource):
