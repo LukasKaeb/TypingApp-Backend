@@ -25,7 +25,7 @@ def generate_return_dict(status, msg):
     return ret_json
 
 def update_test_count(uid, test_count):
-    users.update_one({'uid': uid}, {'$set': {'test_count': test_count}})
+    users.update_one({'uid': uid}, {'$inc': {'test_count': increment}})
 
 def update_time_typing(uid, time):
     users.update_one({'uid': uid}, {'$set': {'test_time': time}})
@@ -35,12 +35,12 @@ class UpdateTestCount(Resource):
         posted_data = request.get_json()
 
         uid = posted_data['uid']
-        test_count = posted_data['test_count']
+        increment  = posted_data['test_count']
 
         if not user_exists(uid):
             return jsonify(generate_return_dict(301, 'Invalid User ID'))
         
-        update_test_count(uid, test_count + 1)
+        update_test_count(uid, increment)
         
         return jsonify(generate_return_dict(200, 'Test Count Updated'))
 
