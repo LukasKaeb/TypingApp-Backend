@@ -1,3 +1,5 @@
+
+version: '3'
 services:
   web:
     build: ./web
@@ -5,5 +7,10 @@ services:
       - "5001:5000"
     depends_on:
       - db
+    environment:
+      - MONGO_URI=mongodb://db:27017  # Use an environment variable for the connection string
+
   db:
-    build: ./db
+    image: mongo  # Use the official MongoDB image
+    ports:
+      - "27017:27017"

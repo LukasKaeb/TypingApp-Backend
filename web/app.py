@@ -2,12 +2,14 @@ from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flask_restful import Api, Resource
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
 
-client = MongoClient('mongodb://db:27017')
+mongo_uri = os.environ.get('MONGO_URI', 'mongodb://localhost:27017')
+client = MongoClient(mongo_uri)
 db = client.typingdb
 users = db['Users']
 
@@ -87,8 +89,9 @@ class StoreTestResult(Resource):
             uid = posted_data['uid']
             wpm = posted_data['wpm']
             raw_wpm = posted_data['raw_wpm']
-        
+            print(f"User ID: {uid}") 
             if not user_exists(uid):
+                print("User does not exist")
                 return jsonify(generate_return_dict(301, 'Invalid User ID'))
         
             #New data base entry for the user
