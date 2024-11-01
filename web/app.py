@@ -143,12 +143,33 @@ class GetTypingStats(Resource):
             print(f"Error occurred: {e}")
             return {"status": "error", "message": str(e)}, 500
 
+class SetUsername(Resource):
+    def post(self):
+        try:
+            posted_data = request.get_json()
+
+            uid = posted_data['uid']
+            username = posted_data['username']
+
+            if not user_exists(uid):
+                return jsonify(generate_return_dict(301, 'Invalid User ID'))
+            elif not username:
+                return jsonify(generate_return_dict(302, 'Invalid Username'))
+
+            users.update_one({'uid': uid}, {'$set': {'username': username}})
+
+            return jsonify(generate_return_dict(200, 'Username Updated'))
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return {"status": "error", "message": str(e)}, 500
+
 api.add_resource(UpdateTestCount, '/update_test_count')
 api.add_resource(AddUser, '/add_user')
 api.add_resource(UpdateTimeTyping, '/update_time_typing')
 api.add_resource(StoreTestResult, '/store_test_result')
 api.add_resource(GetUserStats, '/get_user_stats/<string:uid>')
 api.add_resource(GetTypingStats, '/get_typing_stats/<string:uid>')
+api.add_resource(SetUsername, '/set_username')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
