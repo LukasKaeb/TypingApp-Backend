@@ -2,10 +2,13 @@ from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flask_restful import Api, Resource
 from flask_cors import CORS
+from flask_cors import cross_origin
 import os
 
 app = Flask(__name__)
-CORS(app)
+
+# Allow CORS globally for all routes with specified origins and methods
+cors = CORS(app, resources={r"/*": {"origins": "*"}}, methods=["POST", "GET", "OPTIONS"])
 api = Api(app)
 
 mongo_uri = os.environ.get('MONGO_URI', 'mongodb://localhost:27017')
@@ -144,6 +147,12 @@ class GetTypingStats(Resource):
             return {"status": "error", "message": str(e)}, 500
 
 class SetUsername(Resource):
+    @cross_origin()
+    def options(self):
+        return {'Allow': 'POST'}, 200, {'Access-Control-Allow-Origin': '*'}
+
+
+
     def post(self):
         try:
             posted_data = request.get_json()
@@ -163,6 +172,22 @@ class SetUsername(Resource):
             print(f"Error occurred: {e}")
             return {"status": "error", "message": str(e)}, 500
 
+class GetUsername(Resource):
+    def get(self, uid):
+        try:
+            
+            user = users.find_one({'uid': uid}, {'username': 1, '_id': 0})
+            if not user:
+                return jsonify(generate_return_dict(301, 'Invalid User ID'))
+
+            return jsonify({
+                'status': 200,
+                'username': user['username']
+            })
+        except Exception as e:
+            print(f"Error occured: {e}")
+            return {"status": "error", "message": str(e)}, 500
+        
 api.add_resource(UpdateTestCount, '/update_test_count')
 api.add_resource(AddUser, '/add_user')
 api.add_resource(UpdateTimeTyping, '/update_time_typing')
@@ -170,6 +195,9 @@ api.add_resource(StoreTestResult, '/store_test_result')
 api.add_resource(GetUserStats, '/get_user_stats/<string:uid>')
 api.add_resource(GetTypingStats, '/get_typing_stats/<string:uid>')
 api.add_resource(SetUsername, '/set_username')
+api.add_resource(GetUsername, '/get_username/<string:uid>')
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
