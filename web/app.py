@@ -175,7 +175,7 @@ class SetUsername(Resource):
 class GetUsername(Resource):
     def get(self, uid):
         try:
-            
+
             user = users.find_one({'uid': uid}, {'username': 1, '_id': 0})
             if not user:
                 return jsonify(generate_return_dict(301, 'Invalid User ID'))
@@ -187,7 +187,55 @@ class GetUsername(Resource):
         except Exception as e:
             print(f"Error occured: {e}")
             return {"status": "error", "message": str(e)}, 500
-        
+
+
+class GetProfilePic(Resource):
+    def get(self, uid):
+        try:
+
+            user = users.find_one({'uid': uid}, {'profile_picture': 1, '_id': 0})
+
+            if not user:
+                return jsonify(generate_return_dict(301, 'Invalid User ID'))
+
+            return jsonify({
+                'status': 200,
+                'msg': 'Fetched profile picture',
+                'profile_picture': user['profile_picture']
+            })
+        except Exception as e:
+            print(f"Error occured: {e}")
+            return {"status": "error", "message": str(e)}, 500
+
+
+class AddProfilePic(Resource):
+    @cross_origin()
+    def options(self):
+        return {'Allow': 'POST'}, 200, {'Access-Control-Allow-Origin': '*'}
+
+
+    def post(self):
+        try:
+            posted_data = request.get_json()
+
+            uid = posted_data.get('uid')
+            image = posted_data.get('image')
+
+            if not user_exists(uid):
+                return jsonify(generate_return_dict(301, 'Invalid User ID'))
+            elif not image:
+                return jsonify(generate_return_dict(301, 'Invalid Image'))
+
+
+            users.update_one({'uid': uid},
+                {'$set': {'profile_picture': image}})
+
+            return jsonify(generate_return_dict(200, 'Profile picture updated'))
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return {"status": "error", "message": str(e)}, 500
+
+
 api.add_resource(UpdateTestCount, '/update_test_count')
 api.add_resource(AddUser, '/add_user')
 api.add_resource(UpdateTimeTyping, '/update_time_typing')
@@ -196,6 +244,8 @@ api.add_resource(GetUserStats, '/get_user_stats/<string:uid>')
 api.add_resource(GetTypingStats, '/get_typing_stats/<string:uid>')
 api.add_resource(SetUsername, '/set_username')
 api.add_resource(GetUsername, '/get_username/<string:uid>')
+api.add_resource(GetProfilePic, '/get_profilepic/<string:uid>')
+api.add_resource(AddProfilePic, '/set_profilepic')
 
 
 
